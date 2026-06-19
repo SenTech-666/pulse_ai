@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ reply: 'У тебя пока нет заметок. Создай хотя бы одну!' });
     }
 
-    // RAG — находим релевантные заметки
+    // RAG
     const relevantNotes = notes
       .filter(note =>
         note.title.toLowerCase().includes(message.toLowerCase()) ||
