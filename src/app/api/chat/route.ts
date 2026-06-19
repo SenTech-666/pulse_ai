@@ -1,4 +1,4 @@
-// app/api/chat/route.ts
+// src/app/api/chat/route.ts
 import OpenAI from 'openai';
 import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
