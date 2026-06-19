@@ -28,10 +28,8 @@ export async function POST(req: NextRequest) {
       systemPrompt = 'Улучши текст: сделай его грамотнее, структурированнее, понятнее и профессиональнее. Сохрани оригинальный смысл.';
     }
 
-    const modelUri = `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite`;
-
     const completion = await client.chat.completions.create({
-      model: modelUri,
+      model: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite`,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt.trim() }
@@ -46,6 +44,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error("AI Error:", error);
-    return Response.json({ error: error.message || 'Ошибка' }, { status: 500 });
+    return Response.json({ error: error.message || 'Ошибка Yandex GPT' }, { status: 500 });
   }
 }

@@ -47,30 +47,50 @@ export default function NotesEditor() {
   );
 
   const saveNote = async () => {
-    if (!user || !currentNote.title?.trim()) return;
-    setIsSaving(true);
+  if (!user || !currentNote.title?.trim()) return;
+  setIsSaving(true);
 
-    const noteData = {
-      user_id: user.id,
-      title: currentNote.title.trim(),
-      content: currentNote.content?.trim() || '',
-      tags: currentNote.tags || [],
-    };
+  const fullText = `${currentNote.title} ${currentNote.content || ''}`;
 
-    try {
-      if (currentNote.id) {
-        await supabase.from('notes').update(noteData as any).eq('id', currentNote.id);
-      } else {
-        await supabase.from('notes').insert(noteData as any);
-      }
-      const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
-      setNotes(data || []);
-    } catch (err) {
-      alert('Ошибка сохранения');
-    } finally {
-      setIsSaving(false);
-    }
+  const noteData = {
+    user_id: user.id,
+    title: currentNote.title.trim(),
+    content: currentNote.content?.trim() || '',
+    tags: currentNote.tags || [],
   };
+
+  try {
+    let noteId: string;
+
+    if (currentNote.id) {
+      await supabase.from('notes').update(noteData).eq('id', currentNote.id);
+      noteId = currentNote.id;
+    } else {
+      const { data } = await supabase.from('notes').insert(noteData).select('id').single();
+      noteId = data!.id;
+    }
+
+    // Генерируем и сохраняем embedding
+    try {
+      const res = await fetch('/api/embed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fullText, noteId }),
+      });
+      await res.json();
+    } catch (e) {
+      console.warn('Embedding generation failed (continue anyway)', e);
+    }
+
+    // Обновляем список
+    const { data } = await supabase.from('notes').select('*').order('updated_at', { ascending: false });
+    setNotes(data || []);
+  } catch (err) {
+    alert('Ошибка сохранения');
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const callAI = async (action: 'title' | 'summarize' | 'improve') => {
     const promptText = action === 'title'

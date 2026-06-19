@@ -40,8 +40,24 @@ export default function Home() {
               <LogOut className="w-4 h-4" />
               Выйти
             </button>
+ 
           </div>
+          
         </div>
+                   <button 
+  onClick={async () => {
+    const res = await fetch('/api/reindex', { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}) 
+    });
+    const data = await res.json();
+    alert(data.message || data.error);
+  }}
+  className="fixed bottom-4 right-4 bg-purple-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-purple-700"
+>
+  🔄 Переиндексировать все заметки
+</button>
       </nav>
 
       <div className="pt-20">
