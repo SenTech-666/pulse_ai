@@ -24,18 +24,15 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Сообщение и пользователь обязательны' }, { status: 400 });
     }
 
-    // Загружаем заметки пользователя
     const { data: notes } = await supabase
       .from('notes')
       .select('id, title, content')
       .eq('user_id', userId);
 
-    // Если заметок нет — показываем сообщение
     if (!notes || notes.length === 0) {
       return Response.json({ reply: 'У тебя пока нет заметок. Создай хотя бы одну!' });
     }
 
-    // Простой RAG (находим релевантные заметки)
     const relevantNotes = notes
       .filter(note =>
         note.title.toLowerCase().includes(message.toLowerCase()) ||
@@ -47,7 +44,6 @@ export async function POST(req: NextRequest) {
       .map((n, i) => `Заметка ${i + 1}: ${n.title}\n${n.content}`)
       .join('\n\n---\n\n');
 
-    // Генерация ответа через YandexGPT
     const completion = await openai.chat.completions.create({
       model: `gpt://${process.env.YANDEX_FOLDER_ID}/yandexgpt-lite`,
       messages: [
